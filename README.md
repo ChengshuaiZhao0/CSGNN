@@ -4,9 +4,9 @@ The code for paper "CSGNN: Contrastive Self-Supervised Graph Neural Network for 
 ## 1 Overview
 The repository is organized as follows:
 
-+ `data/` contains the dataset files for CSGNN;
++ `data/` contains the datasets used in the paper;
 + `parms_setting.py` contains all hyperparameters adopted by CSGNN;
-+ `data_preprocess.py` contains the preprocess of origin data before loading into CSGNN;
++ `data_preprocess.py` contains the preprocess of data before training;
 + `layer.py` contains mix-hop GNN layers and contrastive learning GNN layers;
 + `instantiation/` contains the code which instantiate the CSGNN;
 + `train.py` contains the training and testing code on datasets;
@@ -15,12 +15,12 @@ The repository is organized as follows:
 
 
 ## 2 Dependencies
-*numpy == 1.18.5
-*scipy == 1.5.2
-*sklearn == 0.23.2
-*torch == 1.5.0
-*torch-geometric == 1.6.1
-*networkx == 2.4
+* numpy == 1.18.5
+* scipy == 1.5.2
+* sklearn == 0.23.2
+* torch == 1.5.0
+* torch-geometric == 1.6.1
+* networkx == 2.4
 
 
 ### 3 Example
