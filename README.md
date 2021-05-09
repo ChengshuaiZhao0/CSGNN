@@ -1,7 +1,7 @@
 # CSGNN
 The code for paper "CSGNN: Contrastive Self-Supervised Graph Neural Network for Molecular Interaction Prediction"
 
-![overview](D:\repsoitory\CSGNN\overview.jpg)
+![overview](https://github.com/ChengshuaiZhao0/CSGNN/blob/master/overview.jpg)
 
 ## 1. Overview
 The repository is organized as follows:
