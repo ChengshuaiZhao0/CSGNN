@@ -1,7 +1,9 @@
 # CSGNN
-The code for paper "CSGNN: Contrastive Self-Supervised Graph Neural Network for MolecularInteraction Prediction"
+The code for paper "CSGNN: Contrastive Self-Supervised Graph Neural Network for Molecular Interaction Prediction"
 
-## 1 Overview
+![overview](D:\repsoitory\CSGNN\overview.jpg)
+
+## 1. Overview
 The repository is organized as follows:
 
 + `data/` contains the datasets used in the paper;
@@ -14,7 +16,7 @@ The repository is organized as follows:
 + `main.py` contains entry to CSGNN (e.g normalize...);
 
 
-## 2 Dependencies
+## 2. Dependencies
 * numpy == 1.18.5
 * scipy == 1.5.2
 * sklearn == 0.23.2
@@ -23,12 +25,13 @@ The repository is organized as follows:
 * networkx == 2.4
 
 
-### 3 Example
+## 3. Example
 Here we provide several example of using CSGNN
 To run CSGNN with GCN aggregator on DTI network using "uniform" as initial features and ouput the result to test.txt, execute the following command:
 
 	python main.py --aggregator GCN --feature_type uniform --in_file data/DTI.edgelist --out_file test.txt
-	
+
 To run CSGNN with GCN aggregator on DDI network using one-hot coding as initial features and ouput the result to test.txt, execute the following command:
 	
+
 	python main.py --aggregator GIN --feature_type one_hot --in_file data/DDI.edgelist --out_file test.txt
