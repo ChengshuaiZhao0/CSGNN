@@ -18,16 +18,16 @@ def settings():
                         help='Number of parallel workers. Default is 0.')
 
     parser.add_argument('--aggregator', choices=['GCN', 'GIN'], default='GCN',
-                        help='Message passing framework adopted in CSGNN')
+                        help='Message passing framework adopted in CSGNN. Default is GCN.')
 
     parser.add_argument('--in_file', required=True,
-                        help='Path to data fold. e.g. data/DDI.edgelist')
+                        help='Path to data fold. e.g., data/DDI.edgelist')
 
     parser.add_argument('--out_file', required=True,
-                        help='Path to data result file. e.g. result.txt')
+                        help='Path to data result file. e.g., result.txt')
 
-    parser.add_argument('--feature_type', type=str, default='one_hot', choices=['one_hot', 'uniform', 'normal', 'position'],
-                        help='Initial node feature type. Default is one_hot.')
+    parser.add_argument('--feature_type', type=str, default='position', choices=['one_hot', 'uniform', 'normal', 'position'],
+                        help='Initial node feature type. Default is position.')
 
     parser.add_argument('--lr', type=float, default=5e-4,
                         help='Initial learning rate. Default is 5e-4.')

@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
+from torch_geometric.nn import GINConv
 
 
 def reset_parameters(w):
@@ -52,15 +53,40 @@ class AvgReadout(nn.Module):
             msk = torch.unsqueeze(msk, -1)
             return torch.sum(seq * msk, 0) / torch.sum(msk)
 
+class MLP(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(MLP, self).__init__()
+
+        self.linear1 = nn.Linear(in_channels, 2 * out_channels)
+        self.linear2 = nn.Linear(2 * out_channels, out_channels)
+
+    def forward(self, x):
+        x = F.relu(self.linear1(x))
+        x = self.linear2(x)
+
+        return x
+
 
 class CSGNN(nn.Module):
-    def __init__(self, feature, hidden1, hidden2, decoder1, dropout):
+    def __init__(self, aggregator, feature, hidden1, hidden2, decoder1, dropout):
         super(CSGNN, self).__init__()
 
-        self.gcn_o1 = GCNConv(feature, hidden1)
-        self.gcn_o2 = GCNConv(hidden1 * 2, hidden2)
-        self.gcn_s1 = GCNConv(feature, hidden1)
-        self.gcn_s2 = GCNConv(hidden1 * 2, hidden2)
+        if aggregator == 'GIN':
+            self.mlp_o1 = MLP(feature, hidden1)
+            self.mlp_o2 = MLP(hidden1 * 2, hidden2)
+            self.mlp_s1 = MLP(feature, hidden1)
+            self.mlp_s2 = MLP(hidden1 * 2, hidden2)
+
+            self.encoder_o1 = GINConv(self.mlp_o1, train_eps=True).jittable()
+            self.encoder_o2 = GINConv(self.mlp_o2, train_eps=True).jittable()
+            self.encoder_s1 = GINConv(self.mlp_s1, train_eps=True).jittable()
+            self.encoder_s2 = GINConv(self.mlp_s2, train_eps=True).jittable()
+
+        elif aggregator == 'GCN':
+            self.encoder_o1 = GCNConv(feature, hidden1)
+            self.encoder_o2 = GCNConv(hidden1 * 2, hidden2)
+            self.encoder_s1 = GCNConv(feature, hidden1)
+            self.encoder_s2 = GCNConv(hidden1 * 2, hidden2)
 
         self.decoder1 = nn.Linear(hidden2 * 2 * 4, decoder1)
         self.decoder2 = nn.Linear(decoder1, 1)
@@ -77,27 +103,27 @@ class CSGNN(nn.Module):
         adj2 = data_s.edge_index
         x_a = data_a.x
 
-        x1_o = F.relu(self.gcn_o1(x_o, adj))
+        x1_o = F.relu(self.encoder_o1(x_o, adj))
         x1_o = F.dropout(x1_o, self.dropout, training=self.training)
-        x1_s = F.relu(self.gcn_s1(x_o, adj2))
+        x1_s = F.relu(self.encoder_s1(x_o, adj2))
         x1_s = F.dropout(x1_s, self.dropout, training=self.training)
 
         x1_os = torch.cat((x1_o, x1_s), dim=1)
 
-        x2_o = self.gcn_o2(x1_os, adj)
-        x2_s = self.gcn_s2(x1_os, adj2)
+        x2_o = self.encoder_o2(x1_os, adj)
+        x2_s = self.encoder_s2(x1_os, adj2)
 
         x2_os = torch.cat((x2_o, x2_s), dim=1)
 
-        x1_o_a = F.relu(self.gcn_o1(x_a, adj))
+        x1_o_a = F.relu(self.encoder_o1(x_a, adj))
         x1_o_a = F.dropout(x1_o_a, self.dropout, training=self.training)
-        x1_s_a = F.relu(self.gcn_s1(x_a, adj2))
+        x1_s_a = F.relu(self.encoder_s1(x_a, adj2))
         x1_s_a = F.dropout(x1_s_a, self.dropout, training=self.training)
 
         x1_os_a = torch.cat((x1_o_a, x1_s_a), dim=1)
 
-        x2_o_a = self.gcn_o2(x1_os_a, adj)
-        x2_s_a = self.gcn_s2(x1_os_a, adj2)
+        x2_o_a = self.encoder_o2(x1_os_a, adj)
+        x2_s_a = self.encoder_s2(x1_os_a, adj2)
 
         x2_os_a = torch.cat((x2_o_a, x2_s_a), dim=1)
 
